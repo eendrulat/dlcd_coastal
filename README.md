@@ -5,13 +5,10 @@ This is a simple application that geocodes addresses, Township/Range/Section ide
 
 [View it live](http://htmlpreview.github.io/?https://github.com/eendrulat/dlcd_coastal/blob/master/index.html)
 
-![App](https://github.com/eendrulat/dlcd_coastal/blob/master/app.JPG)
+![Screenshot](https://raw.github.com/eendrulat/dlcd_coastal/master/app.png)
 
 ## Features
-* Includes two main pages: simple search page (leg-search.html) and main map interface (leg-districts.html)
-* Simple search page contains a single line address search bar. Passes address to leg-districts.html
-* Main legislative district page will focus on the appropriate legislative district by parameters passed through the URL: 1) from the leg-search page (?addr=), 2) for a specific district, e.g. Congressional district 5 (?dist=5&disttype=c), or 3) a latitude and longitude (?longitude=-123&latitude=45)
-* Main legislative district page also allows searching by address, or interactively selecting districts from the map.
+
 
 ## Project Details
 
