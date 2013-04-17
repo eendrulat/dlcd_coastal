@@ -3,9 +3,9 @@
 This is a simple application that geocodes addresses, Township/Range/Section identifiers, and GNIS Places, focuses on the found location, and visually informs the user whether the location is within the Coastal Zone Boundary.
 
 
-[View it live](http://htmlpreview.github.io/?https://github.com/eendrulat/czfinder/blob/master/index.html)
+[View it live](http://htmlpreview.github.io/?https://github.com/eendrulat/dlcd_coastal/blob/master/index.html)
 
-![App](https://github.com/eendrulat/czfinder/blob/master/app.JPG)
+![App](https://github.com/eendrulat/dlcd_coastal/blob/master/app.JPG)
 
 ## Features
 * Includes two main pages: simple search page (leg-search.html) and main map interface (leg-districts.html)
@@ -15,8 +15,8 @@ This is a simple application that geocodes addresses, Township/Range/Section ide
 
 ## Project Details
 
-* ArcGIS Javascript API, v. 3.4
-* Application was developed by Scott Moore (Esri), Erik Endrulat (Oregon GEO), and Bill Sweeny (OR LegAdmin)
+* ArcGIS Javascript API, v. 3.3
+* Application was developed by Erik Endrulat (Oregon GEO)
 
 ## Resources
 
