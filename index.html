@@ -1,0 +1,250 @@
+<!doctype html>
+<html >
+<head>
+    <meta charset="utf-8" >
+    <meta http-equiv="X-UA-Compatible" content="IE=7, IE=9">
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples on iOS devices-->
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Coastal Zone Locator</title>
+    <link rel="stylesheet" type="text/css" href="http://servicesbeta.esri.com/jsapi/arcgis/3.3/js/dojo/dijit/themes/soria/soria.css">
+    <link rel="stylesheet" type="text/css" href="http://servicesbeta.esri.com/jsapi/arcgis/3.3/js/esri/css/esri.css">
+
+    <style type="text/css">
+        html, body, #map {
+                height:100%;
+                width:100%;
+                margin:0;
+                padding:0;
+            }
+		  #search {
+			display: block;
+			position: absolute;
+			z-index: 2;
+			top: 20px;
+			left: 75px;
+			width: 80%;
+		  } 
+		 /* customize geocoder appearance */
+			.simpleGeocoder, .simpleGeocoder .esriGeocoderContainer {
+				font-size: 1em;
+				line-height: 1em;
+				height: 4em;
+				width: 100%;
+			  }
+			.simpleGeocoder .esriGeocoder {
+					border: 1;
+					height: 100%;
+					-moz-border-radius: 5px;
+					-webkit-border-radius: 5px;
+					border-radius: 5px;
+					-moz-box-shadow: 0 0 5px #888;
+					-webkit-box-shadow: 0 0 5px #888;
+					box-shadow: 0 0 5px #888;
+				  }		  
+		   
+		  .simpleGeocoder .esriGeocoder .esriGeocoderReset {
+			margin: 0;
+		  }
+		 /* make input larger */
+			  .simpleGeocoder .esriGeocoder input {
+				font-size: 1.5em;
+				margin: 0 0 0 1.25%;
+				padding: 1% 0 1% 0;
+				width: 90.75%;
+			  }		  
+		  .simpleGeocoder .esriGeocoderResult:hover, 
+		  .simpleGeocoder .esriGeocoderResultEven:focus, 
+		  .simpleGeocoder .esriGeocoderResultOdd:focus {
+			background-color: #B5DAEA;
+			 }
+			
+            .spotlight {
+                z-index:-1;
+                position:absolute;
+                left:50%;
+                top:50%;
+                border-radius:50%;
+                opacity:0;
+                box-shadow:
+                inset rgba(0,0,0,0.25) 0px 0px 20px 20px,
+                rgba(0,0,0,0.25) 0px 0px 0px 1000px;
+                transition:all 1000ms;
+                -moz-transition:all 1000ms;
+                -webkit-transition:all 1000ms;
+            }
+            .spotlight-active {
+                z-index:2;
+                opacity:1;
+            }
+    </style>
+
+    <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.3" ></script>
+    <script type="text/javascript">
+            dojo.require("esri.map");
+            dojo.require("esri.IdentityManager");
+            dojo.require("esri.arcgis.utils");
+            dojo.require("esri.dijit.Geocoder");
+
+            var map;
+            var Geocoder;
+
+		
+            function init() {
+                
+	
+				esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
+
+                var webmap = "e1adbf94dc494dbcbb8c0d7a500ebb5c";
+
+                var mapDeferred = esri.arcgis.utils.createMap(webmap, "map");
+
+
+                mapDeferred.addCallback(function (response) {
+                    map = response.map;
+
+					geocoders = [{
+					  url: "http://navigator.state.or.us/ArcGIS/rest/services/Locators/gc_Composite/GeocodeServer",
+					  name: "GEO's Geocoder",
+					  placeholder: "Search by address, place name, or PLSS",
+					
+					}];
+			
+                    var html = '<div id="spotlight" class="spotlight"><\/div>';
+
+                    dojo.place(html, dojo.byId('map_container'), 'first');
+
+                    dojo.connect(map, 'onExtentChange', function(){
+                        //removeSpotlight();
+                    });
+
+                    // Geocoder with all common options set. Only map is required.
+                    Geocoder = new esri.dijit.Geocoder({
+           				geocoders: geocoders,
+						autoComplete: true,
+						autoNavigate: true,
+                        arcgisGeocoder:{
+                             placeholder: "Find a place"
+                        },
+						arcgisGeocoder: false,
+                        map: map
+                    }, dojo.byId('search'));
+						
+
+                    // start widget
+                    Geocoder.startup();
+
+                    // on search results
+                    dojo.connect(Geocoder, 'onSearchResults', function(results){
+						//map.setLevel(12);
+						alert("on search results");
+                        console.log('search', results);
+                    });
+
+                    // on search results
+                    dojo.connect(Geocoder, 'onGeocoderSelect', function(results){
+						//map.setLevel(12);
+						alert("on gc select");
+						console.log('onselect', results);
+                    });
+
+                    // on search results
+                    dojo.connect(Geocoder, 'onAutoComplete', function(results){
+						//map.setLevel(12);
+						//alert("on autocomplete");
+                        console.log('autocomplete', results);
+                    });
+
+                    function removeSpotlight(){
+                        dojo.query('.spotlight').removeClass('spotlight-active');
+                        map.graphics.clear();
+                    }
+
+					
+                    dojo.connect(Geocoder, 'onSelect', function(result){
+                       
+					   var spotlight = dojo.connect(map, 'onExtentChange', function(){
+                       
+					   var geom = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, result.extent);
+
+					   map.setLevel(12);
+
+                            var width = geom.xmax - geom.xmin;
+                            var height = geom.ymin - geom.ymax;
+
+                            var max = height;
+                            if(width > height){
+                                max = width;
+                            }
+
+                            var margin = '-' + Math.floor(max/2) + 'px 0 0 -' + Math.floor(max/2) + 'px';
+
+                            var pt = result.feature.geometry;
+                            var sms = new esri.symbol.SimpleMarkerSymbol().setStyle(
+                            esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE).setColor(
+                            new dojo.Color([255,0,0,0.5]));
+                            var graphic = new esri.Graphic(pt,sms,null,null);
+
+							map.graphics.add(graphic);
+							
+                            dojo.query('.spotlight').addClass('spotlight-active').style({
+                                width: max + 'px',
+                                height: max + 'px',
+                                margin: margin
+                            });
+                            dojo.disconnect(spotlight);
+                        });
+
+
+                    });
+
+                    dojo.connect(Geocoder, 'onClear', function(){
+                        removeSpotlight();
+                    });
+
+                });
+                mapDeferred.addErrback(function (error) {
+                    console.log("Map creation failed: ", dojo.toJson(error));
+                });
+
+            }
+
+            //show map on load
+            dojo.addOnLoad(init);
+    </script>
+</head>
+
+<body class="soria">
+
+
+<!--<div id="dialogLoadMessage" dojotype="dijit.Dialog" style="width: 350px;">
+		<table>
+                <tr>
+                    <td>
+                        <div id="divLoadMessage" style="background: black; color: White;">
+					<p><b>Instructions:</b></br>
+					Use this map to find out if a location is inside the Oregon Coastal Zone. You can search for place names, landmarks, or PLSS locations. If you would like to locate a Township-Range-Section number on the map, please use this format for your query: T7N-R7W 7
+					</p><p><b>What is the Oregon Coastal Zone?</b></br>
+					Oregon's coastal zone extends from the Washington border on the north to the California border on the south; seaward to the extent of state jurisdiction as recognized in federal law; and inland t the crest of the coastal mountain range, excepting; 1. The Umpqua River Basin, where the coastal zone extends to Scottsburg; 2. The Rogue River Basin; where the coastal zone extends to Agness; and 3. The Columbia River Basin, where the coastal zone extends to the downstream end of Puget Island. Within this zone the provisions of the 1972 Coastal Zone Management Act (CZMA) apply. The overall objectives of CZMA are to "preserve, protect, develop, and where possible, to restore or enhance the resources of the nation's coastal zone."
+					</p>								
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
+                        <div class="divOk" onclick="dijit.byId('dialogLoadMessage').hide();">
+                            OK</div>
+                    </td>
+                </tr>
+            </table>-->
+</div>
+		
+	
+
+
+
+	</div>
+		<div id="search"></div>
+		<div id="map"></div>
+
+</body>
+</html>
